@@ -1,0 +1,27 @@
+1385935544911	Move compilation units
+1385935559089	Rename type 'RealTimeUpdaterEngine'
+1385935724701	Rename type 'RealTimeDatabaseEngine'
+1385935732243	Rename type 'RealTimePredictionEngine'
+1385936070077	Rename field 'messageLists'
+1385936418155	Rename method 'getMessagesFromJson'
+1385937423394	Rename local variable 'r'
+1385937676345	Move method
+1385937679813	Move method
+1385937683392	Move method
+1385937688358	Move method
+1385937690975	Move method
+1385937696487	Move method
+1385937702053	Move method
+1385937866328	Rename type 'JsonDatabase'
+1385938267005	Rename local variable 'df'
+1385939878919	Move member 'getMessageListFromJson'
+1385940288279	Rename method 'updatePredictions'
+1385946165874	Rename field 'stop'
+1385946181124	Rename method 'getStop'
+1385946568603	Change method 'CheckIn'
+1385946904149	Move method
+1385946919531	Move method
+1385946922360	Move method
+1385947244639	Delete element
+1386037199846	Delete elements
+1386037208379	Delete element

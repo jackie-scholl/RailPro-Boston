@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">RailPro Boston</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_route">RouteActivity</string>
+    
+    <string name="zip_name_routes">routes.txt</string>
+    <string name="zip_name_trips">trips.txt</string>
+    <string name="zip_name_stop_times">stop_times.txt</string>
+    <string name="zip_name_calendar">calendar.txt</string>
+    <string name="zip_name_calendar_exceptions">calendar_dates.txt</string>
+    <string name="zip_name_stops">stops.txt</string>
+    <string name="zip_name_shapes">shapes.txt</string>
+    <string name="dialog_download_zip">Do you want to download the ZIP file? It is large (about 1 MB) but necessary for the application to work correctly.</string>
+    <string name="download_confirm">download</string>
+    <string name="download_cancel">cancel</string>
+    <string name="loading">loading...</string>
+
+</resources>

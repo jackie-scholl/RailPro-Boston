@@ -1,0 +1,55 @@
+1385251746111	Rename method 'getMessages'
+1385252662559	Rename local variable 'p'
+1385252666149	Rename local variable 'm'
+1385310447205	Rename local variable 'messages'
+1385310562447	Move method
+1385324263923	Rename method 'getMessagesFromJson2'
+1385326333399	Delete element
+1385326906446	Move compilation unit
+1385328031443	Rename method 'getCurrent'
+1385328670237	Rename local variable 'to'
+1385328812431	Delete element
+1385331009519	Rename local variable 'enforcedRate'
+1385504481957	Move type 'Messages' to new file
+1385504703403	Rename type 'RealTimeMessage'
+1385504716464	Rename type 'Messages'
+1385504748729	Delete element
+1385504757513	Rename type 'LineEngine'
+1385504906907	Rename field 'UpdateDate'
+1385504946932	Rename field 'Messages'
+1385505335381	Rename method 'getMessageList'
+1385505442960	Rename type 'RealTimeEngine'
+1385506062384	Encapsulate field 'TimeStamp'
+1385506143564	Rename field 'TimeStamp'
+1385506147337	Rename field 'Trip'
+1385506151301	Rename field 'Destination'
+1385506156280	Rename field 'Stop'
+1385506159514	Rename field 'Scheduled'
+1385506163459	Rename field 'Flag'
+1385506165653	Rename field 'Vehicle'
+1385506168580	Rename field 'Latitude'
+1385506171731	Rename field 'Longitude'
+1385506175720	Rename field 'Heading'
+1385506178673	Rename field 'Speed'
+1385506181937	Rename field 'Lateness'
+1385506267857	Encapsulate field 'trip'
+1385506544886	Move method
+1385507110980	Change method 'Message'
+1385507162274	Move method
+1385507836665	Copy method
+1385507941534	Move member 'getTaskOptionsUpdateMessages'
+1385507962665	Move member 'startJoinAllThreads'
+1385507966989	Move member 'updateMessagesForAll'
+1385507994427	Rename method 'getJsonFeed'
+1385508305360	Move field
+1385508318510	Rename method 'getLineNumbers'
+1385588474772	Delete element
+1385589528594	Move member 'updateMessagesForAll'
+1385589541672	Move member 'startJoinAllThreads'
+1385589572732	Move method
+1385589574879	Move method
+1385589587957	Move methods
+1385594338621	Rename method 'openStream2'
+1385595771061	Rename local variable 'lineEngine'
+1385596665445	Move method
+1385596769457	Convert local variable 'maxRate' to field

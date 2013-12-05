@@ -1,0 +1,13 @@
+<!-- Indices written at Sun, 24 Nov 2013 17:27:59 EST -->
+
+<datastore-indexes>
+
+    <!-- Used 1 time in query history -->
+    <datastore-index kind="real_time_update" ancestor="true" source="auto">
+        <property name="route" direction="asc"/>
+        <property name="station" direction="asc"/>
+        <property name="trip" direction="asc"/>
+        <property name="dateCreated" direction="desc"/>
+    </datastore-index>
+
+</datastore-indexes>

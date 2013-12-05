@@ -1,0 +1,30 @@
+1384658250091	Delete elements
+1384658574213	Delete element
+1384661600955	Rename field 'scheduledTimeMillis'
+1384661606529	Rename field 'predictedTimeMillis'
+1384661733568	Rename method 'getScheduledTimeMillis'
+1384661739710	Rename method 'setScheduledTimeMillis'
+1384661744927	Rename local variable 'scheduledTimeMillis'
+1384661751278	Rename method 'getPredictedTimeMillis'
+1384661759060	Rename method 'setPredictedTimeMillis'
+1384661768606	Rename local variable 'predictedTimeMillis'
+1384700921292	Rename type 'PredictionsServlet'
+1384702811429	Infer generic type arguments
+1384703597698	Rename local variable 'scheduledTimed'
+1384706398743	Move type 'RealTimeMessage' to new file
+1384706410100	Delete elements
+1384706472180	Move member 'getPredictedLateness'
+1384706494884	Move member 'getJsonFeed'
+1384715152786	Delete elements
+1384724178170	Rename local variable 'scheduledTime'
+1384724183249	Rename local variable 'routeId'
+1384724187365	Rename local variable 'tripId'
+1384724192377	Rename local variable 'scheduledTime2'
+1384724216527	Rename local variable 'scheduledTime'
+1384724455072	Change method 'CheckIn'
+1385243027531	Rename local variable 'message'
+1385243322855	Copy method
+1385244062021	Rename method 'putMessages'
+1385247530420	Rename local variable 'messages'
+1385247540433	Move method
+1385247545550	Move method
