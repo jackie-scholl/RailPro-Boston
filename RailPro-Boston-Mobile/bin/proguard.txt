@@ -13,9 +13,9 @@
 # view AndroidManifest.xml #generated:68
 -keep class com.tumblr.railproboston.android.RegisterActivity { <init>(...); }
 
-# view large\res/layout-large/activity_main.xml #generated:6
+# view large/res/layout-large/activity_main.xml #generated:6
 -keep class com.tumblr.railproboston.android.ui.RoutesFragment { <init>(...); }
 
-# view large\res/layout-large/activity_main.xml #generated:12
+# view large/res/layout-large/activity_main.xml #generated:12
 -keep class com.tumblr.railproboston.android.ui.TripsFragment { <init>(...); }
 
