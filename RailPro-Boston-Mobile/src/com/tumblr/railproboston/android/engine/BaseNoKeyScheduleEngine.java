@@ -1,8 +1,6 @@
 package com.tumblr.railproboston.android.engine;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 
 public abstract class BaseNoKeyScheduleEngine<V> extends
 		BaseScheduleEngine<Object, V> {

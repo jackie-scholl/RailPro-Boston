@@ -1,6 +1,7 @@
 package com.tumblr.railproboston.android;
 
 import jscholl.commuterrail.R;
+import android.app.ActionBar;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
@@ -10,7 +11,9 @@ import android.view.Menu;
 import com.tumblr.railproboston.android.engine.ScheduleEngine;
 import com.tumblr.railproboston.android.engine.types.Route;
 import com.tumblr.railproboston.android.engine.types.Trip;
-import com.tumblr.railproboston.android.ui.*;
+import com.tumblr.railproboston.android.ui.RoutesFragment;
+import com.tumblr.railproboston.android.ui.StopTimesFragment;
+import com.tumblr.railproboston.android.ui.TripsFragment;
 
 public class MainActivityA extends FragmentActivity implements
 		RoutesFragment.OnRouteSelectedListener,

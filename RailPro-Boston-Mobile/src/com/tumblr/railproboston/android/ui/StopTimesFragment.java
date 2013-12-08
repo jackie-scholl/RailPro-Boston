@@ -16,7 +16,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.tumblr.railproboston.android.engine.ScheduleEngine;
-import com.tumblr.railproboston.android.engine.StopTimesEngine;
 import com.tumblr.railproboston.android.engine.types.StopTime;
 import com.tumblr.railproboston.android.engine.types.Trip;
 import com.tumblr.railproboston.android.predict.PredictionEngine;

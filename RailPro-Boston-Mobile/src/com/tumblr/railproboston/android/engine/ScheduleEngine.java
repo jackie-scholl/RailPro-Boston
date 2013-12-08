@@ -37,8 +37,8 @@ public class ScheduleEngine {
 	private static Context context = null;
 
 	private static ScheduleEngine2 scheduleEngine2;
-	private static BaseNoKeyScheduleEngine<Route> routesEngine;
-	private static BaseScheduleEngine<Trip, StopTime> stopTimesEngine;
+	private static RoutesEngine routesEngine;
+	private static StopTimesEngine stopTimesEngine;
 
 	public static void setContext(Context ctx) {
 		if (ScheduleEngine.context != ctx) {

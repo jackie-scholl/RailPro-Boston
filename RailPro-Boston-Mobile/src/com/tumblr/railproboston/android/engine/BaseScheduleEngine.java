@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -69,7 +68,7 @@ public abstract class BaseScheduleEngine<K, V> {
 		}
 
 		SQLiteDatabase db = getPopulatedReadableDatabase();
-		String query = getUnionQuery(keys);
+		String query = this.getUnionQuery(keys);
 		Log.d(CLASSNAME, String.format("Query is: %s", query));
 		Log.i(CLASSNAME, "About to make query");
 		Cursor c = db.rawQuery(query, null);
@@ -93,13 +92,13 @@ public abstract class BaseScheduleEngine<K, V> {
 		List<V> values = new ArrayList<V>();
 		SQLiteDatabase db = getPopulatedReadableDatabase();
 
-		// How you want the results sorted in the resulting Cursor
-		String sortOrder = sortOrder();
-		String selection = selection(key); // SQL where clause
-		String[] selectionArgs = selectionArgs(key);
+		String sortOrder = this.sortOrder();
+		String selection = this.selection(key);
+		String[] selectionArgs = this.selectionArgs(key);
 
-		Log.d(CLASSNAME, String.format("Query is: %s with args %s", selection,
-				Arrays.toString(selectionArgs)));
+		Log.d(CLASSNAME,
+				String.format("Query is: %s with args %s", selection,
+						Arrays.toString(selectionArgs)));
 		Log.i(CLASSNAME, "About to make query");
 
 		Cursor c = db.query(getTableName(), null, selection, selectionArgs, null, null, sortOrder);
