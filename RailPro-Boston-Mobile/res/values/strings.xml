@@ -14,8 +14,8 @@
     <string name="zip_name_stops">stops.txt</string>
     <string name="zip_name_shapes">shapes.txt</string>
     <string name="dialog_download_zip">Do you want to download the ZIP file? It is large (about 1 MB) but necessary for the application to work correctly.</string>
-    <string name="download_confirm">download</string>
-    <string name="download_cancel">cancel</string>
-    <string name="loading">loading...</string>
+    <string name="download_confirm">Download</string>
+    <string name="download_cancel">Cancel</string>
+    <string name="loading">Loading&#8230;</string> <!-- 8230: ellipsis-->
 
 </resources>

@@ -1,10 +1,11 @@
 package com.tumblr.railproboston.android.engine;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.*;
-
-import com.tumblr.railproboston.android.engine.CalendarReaderContract.CalendarEntry;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Locale;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -14,180 +15,88 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-public class CalendarEngine {
-	private static final String CLASSNAME = new Object() {}.getClass().getEnclosingClass()
-			.getSimpleName();
+import com.tumblr.railproboston.android.engine.CalendarReaderContract.CalendarEntry;
 
-	public static void setUpServiceDates(Context ctx) {
-		Log.i(CLASSNAME, "Setting up calendar");
-		Map<String, ServiceDate> calendar = new HashMap<String, ServiceDate>();
+public class CalendarEngine extends BaseScheduleEngine<String, ServiceDate> {
+	private static final String CLASSNAME = new Object() {}.getClass().getEnclosingClass().getSimpleName();
 
-		try {
-			BufferedReader br = ScheduleEngine.getReader(ScheduleEngine.CALENDAR);
-			String line = br.readLine();
-			while (line != null) {
-				String[] rowData = line.split(",");
-				if (rowData[0].substring(1, 3).equals("CR"))
-					calendar.put(rowData[0], new ServiceDate(rowData));
-				line = br.readLine();
-			}
-			br.close();
-		} catch (IOException e) {
-			Log.w(CLASSNAME, "Quit setting up calendar due to I/O error");
-		}
-
-		Log.d(CLASSNAME, "Done reading calendar from file");
-
-		CalendarReaderDbHelper mDbHelper = new CalendarReaderDbHelper(ctx);
-
-		Log.d(CLASSNAME, "About to get writable database");
-		// Gets the data repository in write mode
-		SQLiteDatabase db = mDbHelper.getWritableDatabase();
-		Log.d(CLASSNAME, "Just got writable database");
-
-		for (ServiceDate x : calendar.values()) {
-			// Create a new map of values, where column names are the keys
-			ContentValues values = new ContentValues();
-			values.put(CalendarEntry.COLUMN_NAME_SERVICE_ID, x.id);
-			values.put(CalendarEntry.COLUMN_NAME_WEEKDAYS, x.weekdays);
-			values.put(CalendarEntry.COLUMN_NAME_SATURDAYS, x.saturdays);
-			values.put(CalendarEntry.COLUMN_NAME_SUNDAYS, x.sundays);
-			values.put(CalendarEntry.COLUMN_NAME_START_DATE, x.startDate);
-			values.put(CalendarEntry.COLUMN_NAME_END_DATE, x.endDate);
-
-			Log.d(CLASSNAME, "Adding service date " + values);
-			// Insert the new row
-			db.insert(CalendarEntry.TABLE_NAME, null, values);
-		}
-		db.close();
-		Log.d(CLASSNAME, "Done writing calendars to database");
-
-		Log.i(CLASSNAME, "Done setting up calendar");
+	public CalendarEngine(Context ctx) {
+		super(ctx);
 	}
 
-	public static List<ServiceDate> getServiceDates(Context ctx) {
-		SQLiteDatabase db = getPopulatedReadableDatabase(ctx);
-
-		// How you want the results sorted in the resulting Cursor
-		String sortOrder = CalendarEntry.COLUMN_NAME_SERVICE_ID + " DESC";
-
-		Log.i(CLASSNAME, "About to make query");
-
-		Cursor c = db.query(CalendarEntry.TABLE_NAME, // The table to query
-				null, // The columns to return (null means all)
-				null, // The columns for the WHERE clause
-				null, // The values for the WHERE clause
-				null, // don't group the rows
-				null, // don't filter by row groups
-				sortOrder // The sort order
-				);
-
-		Log.i(CLASSNAME, "About to process query results");
-		Log.d(CLASSNAME, "There were this many results: " + c.getCount());
-
-		List<ServiceDate> calendar = getServiceDates(c);
-		List<CalendarException> exceptions = CalendarExceptionEngine.getExceptions(ctx);
-		for (ServiceDate sd : calendar) {
-			sd.addExceptions(exceptions);
-		}
-
-		db.close();
-		Log.i(CLASSNAME, "Done processing query results");
-		return calendar;
-	}
-
-	public static ServiceDate getServiceDate(Context ctx, String serviceId) {
-		SQLiteDatabase db = getPopulatedReadableDatabase(ctx);
-
-		String selection = CalendarEntry.COLUMN_NAME_SERVICE_ID + "=?"; // SQL where clause
-		String[] selectionArgs = { serviceId };
-
-		Log.i(CLASSNAME, "About to make query");
-
-		Cursor c = db.query(CalendarEntry.TABLE_NAME, null, selection, selectionArgs, null, null,
-				null);
-
-		Log.d(CLASSNAME, "There were this many results (expecting 1): " + c.getCount());
-		List<ServiceDate> calendar = getServiceDates(c);
-		ServiceDate sd = calendar.get(0);
-
-		List<CalendarException> exceptions = CalendarExceptionEngine.getExceptions(ctx, serviceId);
-		sd.addExceptions(exceptions);
-
-		db.close();
-		Log.d(CLASSNAME, "Done processing query results");
-		return sd;
-	}
-
-	/**
-	 * @deprecated Use {@link #getServiceIDs(ScheduleEngine2,Date)} instead
-	 */
-	public static List<String> getServiceIDs(Context ctx, Date d) {
-		return getServiceIDs(ctx, d);
-	}
-
-	public static List<String> getServiceIDs(ScheduleEngine2 scheduleEngine, Date d) {
+	public String getServiceIDs(Date d) {
 		Log.d(CLASSNAME, "Getting service ids for " + d);
-		List<ServiceDate> serviceDates = getServiceDates(scheduleEngine.ctx());
+		List<ServiceDate> serviceDates = getAll();
 		List<String> serviceIDs = new ArrayList<String>();
-		//Log.d(CLASSNAME, "Checking service dates");
 		for (ServiceDate sd : serviceDates) {
 			if (sd.isWithinService(d))
 				serviceIDs.add(sd.id);
 		}
-		return serviceIDs;
+
+		if (serviceIDs.size() != 1)
+			Log.e(CLASSNAME, "Wrong number of service ids. All service ids: " + serviceIDs);
+		Log.d(CLASSNAME, "Service ID is: " + serviceIDs.get(0));
+
+		return serviceIDs.get(0);
 	}
 
-	/**
-	 * @deprecated Use {@link #getServiceIdToday(ScheduleEngine2)} instead
-	 */
-	public static String getServiceIdToday(Context ctx) {
-		return getServiceIdToday(ctx);
+	@Override
+	protected String getPluralName() {
+		return "service dates";
 	}
 
-	public static String getServiceIdToday(ScheduleEngine2 scheduleEngine) {
-		List<String> serviceIds = getServiceIDs(scheduleEngine, new Date());
-		Log.d(CLASSNAME,
-				"There were this many service IDs today (expecting 1): " + serviceIds.size());
-		Log.d(CLASSNAME, "Today's service ID is: " + serviceIds.get(0));
-		return serviceIds.get(0);
+	@Override
+	protected String getFileName() {
+		return ScheduleEngine.CALENDAR;
 	}
 
-	private static List<ServiceDate> getServiceDates(Cursor c) {
-		c.moveToFirst();
-		List<ServiceDate> calendar = new ArrayList<ServiceDate>();
-		while (!c.isAfterLast()) {
-			String serviceId = c.getString(c
-					.getColumnIndexOrThrow(CalendarEntry.COLUMN_NAME_SERVICE_ID));
-			String weekdays = c.getString(c
-					.getColumnIndexOrThrow(CalendarEntry.COLUMN_NAME_WEEKDAYS));
-			String saturdays = c.getString(c
-					.getColumnIndexOrThrow(CalendarEntry.COLUMN_NAME_SATURDAYS));
-			String sundays = c
-					.getString(c.getColumnIndexOrThrow(CalendarEntry.COLUMN_NAME_SUNDAYS));
-			String startDate = c.getString(c
-					.getColumnIndexOrThrow(CalendarEntry.COLUMN_NAME_START_DATE));
-			String endDate = c.getString(c
-					.getColumnIndexOrThrow(CalendarEntry.COLUMN_NAME_END_DATE));
-			ServiceDate sid = new ServiceDate(serviceId, weekdays, saturdays, sundays, startDate,
-					endDate);
-			calendar.add(sid);
-			c.moveToNext();
-		}
-		c.close();
-		return calendar;
+	@Override
+	protected ServiceDate getValue(String line) {
+		String[] rowData = line.split(",");
+		if (rowData[0].substring(1, 3).equals("CR"))
+			return new ServiceDate(rowData);
+		return null;
 	}
 
-	private static SQLiteDatabase getPopulatedReadableDatabase(Context ctx) {
-		CalendarReaderDbHelper mDbHelper = new CalendarReaderDbHelper(ctx);
-		SQLiteDatabase db = mDbHelper.getReadableDatabase();
-		Cursor c = db.query(CalendarEntry.TABLE_NAME, null, null, null, null, null, null); // Get all rows
-		int count = c.getCount(); // Get number of rows
-		if (count > 0)
-			return db;
-		db.close();
-		setUpServiceDates(ctx);
-		return mDbHelper.getReadableDatabase();
+	@Override
+	protected ContentValues getContentValues(ServiceDate v) {
+		ContentValues values = new ContentValues();
+		values.put(CalendarEntry.COLUMN_NAME_SERVICE_ID, v.id);
+		values.put(CalendarEntry.COLUMN_NAME_WEEKDAYS, v.weekdays);
+		values.put(CalendarEntry.COLUMN_NAME_SATURDAYS, v.saturdays);
+		values.put(CalendarEntry.COLUMN_NAME_SUNDAYS, v.sundays);
+		values.put(CalendarEntry.COLUMN_NAME_START_DATE, v.startDate);
+		values.put(CalendarEntry.COLUMN_NAME_END_DATE, v.endDate);
+		return values;
+	}
+
+	@Override
+	protected String selection(String key) {
+		return equalsSelection(CalendarEntry.COLUMN_NAME_SERVICE_ID, key);
+	}
+
+	@Override
+	protected String getTableName() {
+		// TODO Auto-generated method stub
+		return CalendarEntry.TABLE_NAME;
+	}
+
+	@Override
+	protected String sortOrder() {
+		// TODO Auto-generated method stub
+		return CalendarEntry.COLUMN_NAME_SERVICE_ID + " ASC";
+	}
+
+	@Override
+	protected ServiceDate extractValue(Cursor c) {
+		String serviceId = c.getString(c.getColumnIndexOrThrow(CalendarEntry.COLUMN_NAME_SERVICE_ID));
+		String weekdays = c.getString(c.getColumnIndexOrThrow(CalendarEntry.COLUMN_NAME_WEEKDAYS));
+		String saturdays = c.getString(c.getColumnIndexOrThrow(CalendarEntry.COLUMN_NAME_SATURDAYS));
+		String sundays = c.getString(c.getColumnIndexOrThrow(CalendarEntry.COLUMN_NAME_SUNDAYS));
+		String startDate = c.getString(c.getColumnIndexOrThrow(CalendarEntry.COLUMN_NAME_START_DATE));
+		String endDate = c.getString(c.getColumnIndexOrThrow(CalendarEntry.COLUMN_NAME_END_DATE));
+		ServiceDate sid = new ServiceDate(serviceId, weekdays, saturdays, sundays, startDate, endDate);
+		return sid;
 	}
 }
 
@@ -199,7 +108,7 @@ final class CalendarReaderContract {
 	public CalendarReaderContract() {}
 
 	/* Inner class that defines the table contents */
-	public static abstract class CalendarEntry implements BaseColumns {
+	static abstract class CalendarEntry implements BaseColumns {
 		public static final String TABLE_NAME = "calendar";
 		public static final String COLUMN_NAME_SERVICE_ID = "serviceid";
 		public static final String COLUMN_NAME_WEEKDAYS = "weekdays";
@@ -211,6 +120,7 @@ final class CalendarReaderContract {
 
 	private static final String TEXT_TYPE = " TEXT";
 	private static final String COMMA_SEP = ",";
+
 	static final String SQL_CREATE_ENTRIES = "CREATE TABLE " + CalendarEntry.TABLE_NAME + "  (" +
 			CalendarEntry._ID + " INTEGER PRIMARY KEY," + CalendarEntry.COLUMN_NAME_SERVICE_ID
 			+ TEXT_TYPE + COMMA_SEP +
@@ -221,35 +131,6 @@ final class CalendarReaderContract {
 			CalendarEntry.COLUMN_NAME_END_DATE + TEXT_TYPE + " )";
 
 	static final String SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS " + CalendarEntry.TABLE_NAME;
-}
-
-class CalendarReaderDbHelper extends SQLiteOpenHelper {
-	private static final String CLASSNAME = new Object() {}.getClass().getEnclosingClass()
-			.getSimpleName();
-	// If you change the database schema, you must increment the database version.
-	public static final int DATABASE_VERSION = 5;
-	public static final String DATABASE_NAME = "CalendarReader.db";
-
-	public CalendarReaderDbHelper(Context context) {
-		super(context, DATABASE_NAME, null, DATABASE_VERSION);
-	}
-
-	public void onCreate(SQLiteDatabase db) {
-		Log.d(CLASSNAME, "About to create database");
-		db.execSQL(CalendarReaderContract.SQL_CREATE_ENTRIES);
-		Log.d(CLASSNAME, "Finished creating database");
-	}
-
-	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		// This database is only a cache for online data, so its upgrade policy is
-		// to simply to discard the data and start over
-		db.execSQL(CalendarReaderContract.SQL_DELETE_ENTRIES);
-		onCreate(db);
-	}
-
-	public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		onUpgrade(db, oldVersion, newVersion);
-	}
 }
 
 class ServiceDate {
@@ -317,7 +198,7 @@ class ServiceDate {
 	}
 
 	public boolean isWithinService(Calendar c) {
-		String formattedDate = String.format("%04d%02d%02d", c.get(Calendar.YEAR),
+		String formattedDate = String.format(Locale.US, "%04d%02d%02d", c.get(Calendar.YEAR),
 				c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
 		//Log.d(CLASSNAME, "Formatted date is "+formattedDate);
 		for (String date : serviceAddedExceptions) {

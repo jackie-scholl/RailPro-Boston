@@ -1,13 +1,8 @@
 package com.tumblr.railproboston.android.engine;
 
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.tumblr.railproboston.android.engine.CalendarExceptionReaderContract.CalendarExceptionEntry;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -16,145 +11,72 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-public class CalendarExceptionEngine {
-	private static final String CLASSNAME = new Object(){}.getClass().getEnclosingClass().getSimpleName();
-	public static void setUpCalendarExceptions(Context ctx) {
-		Log.i(CLASSNAME, "Setting up calendar exceptions");
-		List<CalendarException> exceptions = new ArrayList<CalendarException>();
+public class CalendarExceptionEngine extends BaseScheduleEngine<String, CalendarException> {
+	private static final String CLASSNAME = new Object() {}.getClass().getEnclosingClass().getSimpleName();
 
-		try {
-			BufferedReader br = ScheduleEngine.getReader(ScheduleEngine.CALENDAR_EXCEPTIONS);
-			String line = br.readLine();
-			while (line != null) {
-				String[] rowData = line.split(",");
-				if (rowData[0].substring(1, 3).equals("CR"))
-					exceptions.add(new CalendarException(rowData[0], rowData[1], rowData[2]));
-				line = br.readLine();
-			}
-			br.close();
-		} catch (IOException e) {
-			Log.w(CLASSNAME, "Quit setting up calendar due to I/O error");
-		}
-		
-		Log.d(CLASSNAME, "Done reading calendar exceptions from file");
-		
-		CalendarExceptionReaderDbHelper mDbHelper = new CalendarExceptionReaderDbHelper(ctx);
+	public CalendarExceptionEngine(Context ctx) {
+		super(ctx);
+	}
 
-		Log.d(CLASSNAME, "About to get writable database");
-		// Gets the data repository in write mode
-		SQLiteDatabase db = mDbHelper.getWritableDatabase();
-		Log.d(CLASSNAME, "Just got writable database");
+	public List<CalendarException> getExceptions() {
+		return null;
+	}
 
-		for (CalendarException x : exceptions) {
-			// Create a new map of values, where column names are the keys
-			ContentValues values = new ContentValues();
-			values.put(CalendarExceptionEntry.COLUMN_NAME_SERVICE_ID, x.id);
-			values.put(CalendarExceptionEntry.COLUMN_NAME_DATE, x.date);
-			values.put(CalendarExceptionEntry.COLUMN_NAME_TYPE, x.type);
-			
-			Log.d(CLASSNAME, "Adding service date " + values);
-			// Insert the new row
-			db.insert(CalendarExceptionEntry.TABLE_NAME, null, values);
-		}
-		db.close();
-		Log.d(CLASSNAME, "Done writing calendars to database");
-		
-		Log.i(CLASSNAME, "Done setting up calendar");
+	@Override
+	protected String getPluralName() {
+		return "service dates";
 	}
-	
-	public static List<CalendarException> getExceptions(Context ctx) {
-		Log.i(CLASSNAME, "Getting exceptions");
-		
-		SQLiteDatabase db = getPopulatedReadableDatabase(ctx);
-		
-		// How you want the results sorted in the resulting Cursor
-		String sortOrder = CalendarExceptionEntry.COLUMN_NAME_DATE + " DESC";
-	
-		Log.i(CLASSNAME, "About to make query");
-	
-		Cursor c = db.query(CalendarExceptionEntry.TABLE_NAME, // The table to query
-				null, // The columns to return (null means all)
-				null, // The columns for the WHERE clause
-				null, // The values for the WHERE clause
-				null, // don't group the rows
-				null, // don't filter by row groups
-				sortOrder // The sort order
-				);
-	
-		Log.i(CLASSNAME, "About to process query results");
-		Log.d(CLASSNAME, "There were this many results: " + c.getCount());
-		
-		List<CalendarException> exceptions = getExceptions(c);
-		
-		db.close();
-		Log.i(CLASSNAME, "Done processing query results");
-		return exceptions;
+
+	@Override
+	protected String getFileName() {
+		return ScheduleEngine.CALENDAR_EXCEPTIONS;
 	}
-	
-	public static List<CalendarException> getExceptions(Context ctx, String serviceId) {
-		SQLiteDatabase db = getPopulatedReadableDatabase(ctx);
-		
-		String selection = CalendarExceptionEntry.COLUMN_NAME_SERVICE_ID + "=?"; // SQL where clause
-		String[] selectionArgs = { serviceId };		
-	
-		Log.i(CLASSNAME, "About to make query");
-	
-		Cursor c = db.query(CalendarExceptionEntry.TABLE_NAME, null, selection, selectionArgs, null, null, null);
-	
-		Log.d(CLASSNAME, "There were this many results: " + c.getCount());
-		List<CalendarException> exceptions = getExceptions(c);
-		db.close();
-		Log.d(CLASSNAME, "Done processing query results");
-		return exceptions;
+
+	@Override
+	protected CalendarException getValue(String line) {
+		String[] rowData = line.split(",");
+		if (rowData[0].substring(1, 3).equals("CR"))
+			return new CalendarException(rowData);
+		return null;
 	}
-	/*
-	public static List<String> getServiceIDs(Context ctx, Calendar calendar) {
-		Log.d(CLASSNAME, "Getting service ids for " + calendar);
-		List<ServiceDate> serviceDates = getServiceDates(ctx);
-		List<String> serviceIDs = new ArrayList<String>();
-		Log.d(CLASSNAME, "Checking service dates");
-		for (ServiceDate sd : serviceDates) {
-			if (sd.isWithinService(calendar))
-				serviceIDs.add(sd.id);
-		}
-		return serviceIDs;
-	}*/
-	
-	private static List<CalendarException> getExceptions(Cursor c) {
-		c.moveToFirst();
-		List<CalendarException> exceptions = new ArrayList<CalendarException>();
-		while (!c.isAfterLast()) {
-			String serviceId = c.getString(c.getColumnIndexOrThrow(CalendarExceptionEntry.COLUMN_NAME_SERVICE_ID));
-			String date = c.getString(c.getColumnIndexOrThrow(CalendarExceptionEntry.COLUMN_NAME_DATE));
-			String type = c.getString(c.getColumnIndexOrThrow(CalendarExceptionEntry.COLUMN_NAME_TYPE));
-			exceptions.add(new CalendarException(serviceId, date, type));
-			c.moveToNext();
-		}
-		c.close();
-		return exceptions;
+
+	@Override
+	protected ContentValues getContentValues(CalendarException x) {
+		ContentValues values = new ContentValues();
+		values.put(CalendarExceptionEntry.COLUMN_NAME_SERVICE_ID, x.id);
+		values.put(CalendarExceptionEntry.COLUMN_NAME_DATE, x.date);
+		values.put(CalendarExceptionEntry.COLUMN_NAME_TYPE, x.type);
+		return values;
 	}
-	
-	private static SQLiteDatabase getPopulatedReadableDatabase(Context ctx) {
-		Log.i(CLASSNAME, "Getting database");
-		
-		CalendarExceptionReaderDbHelper mDbHelper = new CalendarExceptionReaderDbHelper(ctx);
-		SQLiteDatabase db = mDbHelper.getReadableDatabase();
-		Log.i(CLASSNAME, "Getting initial readable database");
-		
-		Cursor c = db.query(CalendarExceptionEntry.TABLE_NAME, null, null, null, null, null, null); // Get all rows
-		int count = c.getCount(); // Get number of rows
-		Log.i(CLASSNAME, "Count is " + count);
-		
-		if (count > 0)
-			return db;
-		db.close();
-		setUpCalendarExceptions(ctx);
-		return mDbHelper.getReadableDatabase();
+
+	@Override
+	protected String selection(String key) {
+		return equalsSelection(CalendarExceptionEntry.COLUMN_NAME_SERVICE_ID, key);
+	}
+
+	@Override
+	protected String getTableName() {
+		// TODO Auto-generated method stub
+		return CalendarExceptionEntry.TABLE_NAME;
+	}
+
+	@Override
+	protected String sortOrder() {
+		return CalendarExceptionEntry.COLUMN_NAME_DATE + " ASC";
+	}
+
+	@Override
+	protected CalendarException extractValue(Cursor c) {
+		String serviceId = c.getString(c.getColumnIndexOrThrow(CalendarExceptionEntry.COLUMN_NAME_SERVICE_ID));
+		String date = c.getString(c.getColumnIndexOrThrow(CalendarExceptionEntry.COLUMN_NAME_DATE));
+		String type = c.getString(c.getColumnIndexOrThrow(CalendarExceptionEntry.COLUMN_NAME_TYPE));
+		return new CalendarException(serviceId, date, type);
 	}
 }
 
 final class CalendarExceptionReaderContract {
-	private static final String CLASSNAME = new Object(){}.getClass().getEnclosingClass().getSimpleName();
+	private static final String CLASSNAME = new Object() {}.getClass().getEnclosingClass().getSimpleName();
+
 	// To prevent someone from accidentally instantiating the contract class, give it an empty constructor.
 	public CalendarExceptionReaderContract() {}
 
@@ -172,17 +94,17 @@ final class CalendarExceptionReaderContract {
 			CalendarExceptionEntry._ID + " INTEGER PRIMARY KEY," +
 			CalendarExceptionEntry.COLUMN_NAME_SERVICE_ID + TEXT_TYPE + COMMA_SEP +
 			CalendarExceptionEntry.COLUMN_NAME_DATE + TEXT_TYPE + COMMA_SEP +
-			CalendarExceptionEntry.COLUMN_NAME_TYPE + TEXT_TYPE +" )";
+			CalendarExceptionEntry.COLUMN_NAME_TYPE + TEXT_TYPE + " )";
 
 	static final String SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS " + CalendarExceptionEntry.TABLE_NAME;
 }
 
 class CalendarExceptionReaderDbHelper extends SQLiteOpenHelper {
-	private static final String CLASSNAME = new Object(){}.getClass().getEnclosingClass().getSimpleName();
+	private static final String CLASSNAME = new Object() {}.getClass().getEnclosingClass().getSimpleName();
 	// If you change the database schema, you must increment the database version.
 	public static final int DATABASE_VERSION = 5;
 	public static final String DATABASE_NAME = "CalendarExceptionReader.db";
-	
+
 	public CalendarExceptionReaderDbHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	}
@@ -209,7 +131,7 @@ class CalendarException {
 	String id;
 	String date;
 	String type;
-	
+
 	public CalendarException(String service_id, String date, String exception_type) {
 		this.id = ScheduleEngine.clean(service_id);
 		this.date = ScheduleEngine.clean(date);
@@ -220,3 +142,137 @@ class CalendarException {
 		this(arr[0], arr[1], arr[2]);
 	}
 }
+
+/*public static void setUpCalendarExceptions(Context ctx) {
+	Log.i(CLASSNAME, "Setting up calendar exceptions");
+	List<CalendarException> exceptions = new ArrayList<CalendarException>();
+
+	try {
+		BufferedReader br = ScheduleEngine.getReader(ScheduleEngine.CALENDAR_EXCEPTIONS);
+		String line = br.readLine();
+		while (line != null) {
+			String[] rowData = line.split(",");
+			if (rowData[0].substring(1, 3).equals("CR"))
+				exceptions.add(new CalendarException(rowData[0], rowData[1], rowData[2]));
+			line = br.readLine();
+		}
+		br.close();
+	} catch (IOException e) {
+		Log.w(CLASSNAME, "Quit setting up calendar due to I/O error");
+	}
+
+	Log.d(CLASSNAME, "Done reading calendar exceptions from file");
+
+	CalendarExceptionReaderDbHelper mDbHelper = new CalendarExceptionReaderDbHelper(ctx);
+
+	Log.d(CLASSNAME, "About to get writable database");
+	// Gets the data repository in write mode
+	SQLiteDatabase db = mDbHelper.getWritableDatabase();
+	Log.d(CLASSNAME, "Just got writable database");
+
+	for (CalendarException x : exceptions) {
+		// Create a new map of values, where column names are the keys
+		ContentValues values = new ContentValues();
+		values.put(CalendarExceptionEntry.COLUMN_NAME_SERVICE_ID, x.id);
+		values.put(CalendarExceptionEntry.COLUMN_NAME_DATE, x.date);
+		values.put(CalendarExceptionEntry.COLUMN_NAME_TYPE, x.type);
+
+		Log.d(CLASSNAME, "Adding service date " + values);
+		// Insert the new row
+		db.insert(CalendarExceptionEntry.TABLE_NAME, null, values);
+	}
+	db.close();
+	Log.d(CLASSNAME, "Done writing calendars to database");
+
+	Log.i(CLASSNAME, "Done setting up calendar");
+}
+
+public static List<CalendarException> getExceptions(Context ctx) {
+	Log.i(CLASSNAME, "Getting exceptions");
+
+	SQLiteDatabase db = getPopulatedReadableDatabase(ctx);
+
+	// How you want the results sorted in the resulting Cursor
+	String sortOrder = CalendarExceptionEntry.COLUMN_NAME_DATE + " DESC";
+
+	Log.i(CLASSNAME, "About to make query");
+
+	Cursor c = db.query(CalendarExceptionEntry.TABLE_NAME, // The table to query
+			null, // The columns to return (null means all)
+			null, // The columns for the WHERE clause
+			null, // The values for the WHERE clause
+			null, // don't group the rows
+			null, // don't filter by row groups
+			sortOrder // The sort order
+			);
+
+	Log.i(CLASSNAME, "About to process query results");
+	Log.d(CLASSNAME, "There were this many results: " + c.getCount());
+
+	List<CalendarException> exceptions = getExceptions(c);
+
+	db.close();
+	Log.i(CLASSNAME, "Done processing query results");
+	return exceptions;
+}
+
+public static List<CalendarException> getExceptions(Context ctx, String serviceId) {
+	SQLiteDatabase db = getPopulatedReadableDatabase(ctx);
+
+	String selection = CalendarExceptionEntry.COLUMN_NAME_SERVICE_ID + "=?"; // SQL where clause
+	String[] selectionArgs = { serviceId };
+
+	Log.i(CLASSNAME, "About to make query");
+
+	Cursor c = db.query(CalendarExceptionEntry.TABLE_NAME, null, selection, selectionArgs, null, null, null);
+
+	Log.d(CLASSNAME, "There were this many results: " + c.getCount());
+	List<CalendarException> exceptions = getExceptions(c);
+	db.close();
+	Log.d(CLASSNAME, "Done processing query results");
+	return exceptions;
+}
+
+public static List<String> getServiceIDs(Context ctx, Calendar calendar) {
+	Log.d(CLASSNAME, "Getting service ids for " + calendar);
+	List<ServiceDate> serviceDates = getServiceDates(ctx);
+	List<String> serviceIDs = new ArrayList<String>();
+	Log.d(CLASSNAME, "Checking service dates");
+	for (ServiceDate sd : serviceDates) {
+		if (sd.isWithinService(calendar))
+			serviceIDs.add(sd.id);
+	}
+	return serviceIDs;
+}
+
+private static List<CalendarException> getExceptions(Cursor c) {
+	c.moveToFirst();
+	List<CalendarException> exceptions = new ArrayList<CalendarException>();
+	while (!c.isAfterLast()) {
+		String serviceId = c.getString(c.getColumnIndexOrThrow(CalendarExceptionEntry.COLUMN_NAME_SERVICE_ID));
+		String date = c.getString(c.getColumnIndexOrThrow(CalendarExceptionEntry.COLUMN_NAME_DATE));
+		String type = c.getString(c.getColumnIndexOrThrow(CalendarExceptionEntry.COLUMN_NAME_TYPE));
+		exceptions.add(new CalendarException(serviceId, date, type));
+		c.moveToNext();
+	}
+	c.close();
+	return exceptions;
+}
+
+private static SQLiteDatabase getPopulatedReadableDatabase(Context ctx) {
+	Log.i(CLASSNAME, "Getting database");
+
+	CalendarExceptionReaderDbHelper mDbHelper = new CalendarExceptionReaderDbHelper(ctx);
+	SQLiteDatabase db = mDbHelper.getReadableDatabase();
+	Log.i(CLASSNAME, "Getting initial readable database");
+
+	Cursor c = db.query(CalendarExceptionEntry.TABLE_NAME, null, null, null, null, null, null); // Get all rows
+	int count = c.getCount(); // Get number of rows
+	Log.i(CLASSNAME, "Count is " + count);
+
+	if (count > 0)
+		return db;
+	db.close();
+	setUpCalendarExceptions(ctx);
+	return mDbHelper.getReadableDatabase();
+}*/

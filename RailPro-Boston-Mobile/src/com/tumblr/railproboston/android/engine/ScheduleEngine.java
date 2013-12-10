@@ -36,21 +36,17 @@ public class ScheduleEngine {
 	private static ZipFile gtfs = null;
 	private static Context context = null;
 
-	private static ScheduleEngine2 scheduleEngine2;
 	private static RoutesEngine routesEngine;
 	private static StopTimesEngine stopTimesEngine;
+	private static CalendarEngine calendarEngine;
 
 	public static void setContext(Context ctx) {
 		if (ScheduleEngine.context != ctx) {
 			context = ctx;
-			scheduleEngine2 = new ScheduleEngine2(context);
 			routesEngine = new RoutesEngine(context);
 			stopTimesEngine = new StopTimesEngine(context);
+			calendarEngine = new CalendarEngine(context);
 		}
-	}
-
-	public ScheduleEngine2 engine() {
-		return scheduleEngine2;
 	}
 
 	private static Context ctx() {
@@ -193,7 +189,7 @@ public class ScheduleEngine {
 		routesEngine.prepareDatabase();
 		TripsEngine.prepareDatabase(ctx);
 		stopTimesEngine.prepareDatabase();
-		getServiceIdToday(ctx);
+		calendarEngine.prepareDatabase();
 	}
 
 	public static void waitOnTrips() {
@@ -219,7 +215,7 @@ public class ScheduleEngine {
 	}
 
 	public static void clearCache() {
-		serviceIds = new HashMap<Date, String>();
+		new HashMap<Date, String>();
 	}
 
 	public static Route getRoute(Context ctx, String routeId) {
@@ -261,7 +257,7 @@ public class ScheduleEngine {
 
 	public static Map<Trip, List<StopTime>> getStopTimes(Context ctx, List<Trip> trips) {
 		setContext(ctx);
-		List<StopTime> stopTimes = stopTimesEngine.getAll(trips);
+		List<StopTime> stopTimes = stopTimesEngine.getList(trips);
 		return associate(trips, stopTimes);
 	}
 
@@ -283,27 +279,20 @@ public class ScheduleEngine {
 		return stopTimesEngine.get(t);
 	}
 
-	private static Map<Date, String> serviceIds = new HashMap<Date, String>();
-
 	public static String getServiceIdToday(Context ctx) {
 		return getServiceId(ctx, new Date());
 	}
 
 	public static String getServiceId(Context ctx, Date d) {
-		if (!serviceIds.containsKey(d)) {
-			List<String> sids = CalendarEngine.getServiceIDs(ctx, d);
-			if (sids.size() != 1)
-				Log.e(CLASSNAME, "Wrong number of service ids. All service ids: " + sids);
-			Log.d(CLASSNAME, "Today's service ID is: " + sids.get(0));
-			serviceIds.put(d, sids.get(0));
-		}
-		return serviceIds.get(d);
+		setContext(ctx);
+		return calendarEngine.getServiceIDs(d);
 	}
 
 	public static String clean(String s) {
 		return s.replace("\"", "");
 	}
 
+	//TODO: Move this to MainActivity
 	private static Route selectedRoute;
 
 	public static Route getSelectedRoute() {

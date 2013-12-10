@@ -8,7 +8,7 @@ import android.provider.BaseColumns;
 import com.tumblr.railproboston.android.engine.RoutesReaderContract.RouteEntry;
 import com.tumblr.railproboston.android.engine.types.Route;
 
-public class RoutesEngine extends BaseNoKeyScheduleEngine<Route> {
+public class RoutesEngine extends BaseScheduleEngine<String, Route> {
 	private static final String CLASSNAME = new Object() {}.getClass().getEnclosingClass()
 			.getSimpleName();
 
@@ -16,30 +16,8 @@ public class RoutesEngine extends BaseNoKeyScheduleEngine<Route> {
 		super(ctx);
 	}
 
-	protected ContentValues getContentValues(Route x) {
-		ContentValues values = new ContentValues();
-		values.put(RouteEntry.COLUMN_NAME_ROUTE_ID, x.routeId);
-		values.put(RouteEntry.COLUMN_NAME_SHORT_NAME, x.shortName);
-		values.put(RouteEntry.COLUMN_NAME_LONG_NAME, x.longName);
-		return values;
-	}
-
 	protected String getTableName() {
 		return RouteEntry.TABLE_NAME;
-	}
-
-	protected String sortBy() {
-		return RouteEntry.COLUMN_NAME_ROUTE_ID;
-	}
-
-	public static SqlContract getContract() {
-		return new RoutesReaderContract();
-	}
-
-	@Override
-	protected String[] columns() {
-		return new String[] { RouteEntry.COLUMN_NAME_ROUTE_ID, RouteEntry.COLUMN_NAME_SHORT_NAME,
-				RouteEntry.COLUMN_NAME_SHORT_NAME };
 	}
 
 	@Override
@@ -61,12 +39,40 @@ public class RoutesEngine extends BaseNoKeyScheduleEngine<Route> {
 			return null;
 	}
 
+	protected ContentValues getContentValues(Route x) {
+		ContentValues values = new ContentValues();
+		values.put(RouteEntry.COLUMN_NAME_ROUTE_ID, x.routeId);
+		values.put(RouteEntry.COLUMN_NAME_SHORT_NAME, x.shortName);
+		values.put(RouteEntry.COLUMN_NAME_LONG_NAME, x.longName);
+		return values;
+	}
+
 	@Override
 	protected Route extractValue(Cursor c) {
 		String routeId = getStringByColumn(c, RouteEntry.COLUMN_NAME_ROUTE_ID);
 		String shortName = getStringByColumn(c, RouteEntry.COLUMN_NAME_SHORT_NAME);
 		String longName = getStringByColumn(c, RouteEntry.COLUMN_NAME_LONG_NAME);
 		return new Route(routeId, shortName, longName);
+	}
+
+	@Override
+	protected String selection(String key) {
+		return equalsSelection(RouteEntry.COLUMN_NAME_ROUTE_ID, key);
+	}
+
+	@Override
+	protected String sortOrder() {
+		return RouteEntry.COLUMN_NAME_ROUTE_ID + " ASC";
+	}
+
+	@Override
+	protected String[] columns() {
+		return new String[] { RouteEntry.COLUMN_NAME_ROUTE_ID, RouteEntry.COLUMN_NAME_SHORT_NAME,
+				RouteEntry.COLUMN_NAME_SHORT_NAME };
+	}
+
+	public static SqlContract getContract() {
+		return new RoutesReaderContract();
 	}
 }
 

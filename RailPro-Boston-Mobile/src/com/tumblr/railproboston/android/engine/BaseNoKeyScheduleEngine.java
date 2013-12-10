@@ -3,29 +3,19 @@ package com.tumblr.railproboston.android.engine;
 import android.content.Context;
 
 public abstract class BaseNoKeyScheduleEngine<V> extends
-		BaseScheduleEngine<Object, V> {
+		BaseScheduleEngine<String, V> {
 
 	public BaseNoKeyScheduleEngine(Context ctx) {
 		super(ctx);
 	}
 
 	@Override
-	protected String selection(Object key) {
-		return null;
-	}
-
-	@Override
-	protected String[] selectionArgs(Object key) {
+	protected String selection(String key) {
 		return null;
 	}
 
 	@Override
 	protected String sortOrder() {
-		return null;
-	}
-
-	@Override
-	protected String unionQuerySortOrder() {
 		return null;
 	}
 }
