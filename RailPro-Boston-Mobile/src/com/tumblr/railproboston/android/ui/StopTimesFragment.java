@@ -68,7 +68,7 @@ public class StopTimesFragment extends ListFragment implements OnPredictionFound
 		private String CLASSNAME = new Object() {}.getClass().getEnclosingClass().getSimpleName();
 
 		protected List<StopTime> doInBackground(Trip... trips) {
-			ScheduleEngine.waitOnStopTimes();
+			//ScheduleEngine.waitOnStopTimes();
 			return ScheduleEngine.getStopTimes(getActivity(), trips[0]);
 		}
 

@@ -78,7 +78,7 @@ public class TripsFragment extends ListFragment {
 		private String CLASSNAME = new Object() {}.getClass().getEnclosingClass().getSimpleName();
 
 		protected List<Trip> doInBackground(Route... route) {
-			ScheduleEngine.waitOnTrips();
+			//ScheduleEngine.waitOnTrips();
 			ScheduleEngine.getStopTimes(getActivity(), route[0]);
 			List<Trip> trips = ScheduleEngine.getTrips(getActivity(), route[0]);
 			for (Trip t : trips)

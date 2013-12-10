@@ -24,7 +24,7 @@ public class CalendarExceptionEngine extends BaseScheduleEngine<String, Calendar
 
 	@Override
 	protected String getPluralName() {
-		return "service dates";
+		return "calendar exceptions";
 	}
 
 	@Override
@@ -99,7 +99,24 @@ final class CalendarExceptionReaderContract {
 	static final String SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS " + CalendarExceptionEntry.TABLE_NAME;
 }
 
-class CalendarExceptionReaderDbHelper extends SQLiteOpenHelper {
+class CalendarException {
+	String id;
+	String date;
+	String type;
+
+	public CalendarException(String service_id, String date, String exception_type) {
+		this.id = ScheduleEngine.clean(service_id);
+		this.date = ScheduleEngine.clean(date);
+		this.type = ScheduleEngine.clean(exception_type);
+	}
+
+	public CalendarException(String[] arr) {
+		this(arr[0], arr[1], arr[2]);
+	}
+}
+
+/*
+ * class CalendarExceptionReaderDbHelper extends SQLiteOpenHelper {
 	private static final String CLASSNAME = new Object() {}.getClass().getEnclosingClass().getSimpleName();
 	// If you change the database schema, you must increment the database version.
 	public static final int DATABASE_VERSION = 5;
@@ -127,23 +144,7 @@ class CalendarExceptionReaderDbHelper extends SQLiteOpenHelper {
 	}
 }
 
-class CalendarException {
-	String id;
-	String date;
-	String type;
-
-	public CalendarException(String service_id, String date, String exception_type) {
-		this.id = ScheduleEngine.clean(service_id);
-		this.date = ScheduleEngine.clean(date);
-		this.type = ScheduleEngine.clean(exception_type);
-	}
-
-	public CalendarException(String[] arr) {
-		this(arr[0], arr[1], arr[2]);
-	}
-}
-
-/*public static void setUpCalendarExceptions(Context ctx) {
+ * public static void setUpCalendarExceptions(Context ctx) {
 	Log.i(CLASSNAME, "Setting up calendar exceptions");
 	List<CalendarException> exceptions = new ArrayList<CalendarException>();
 
