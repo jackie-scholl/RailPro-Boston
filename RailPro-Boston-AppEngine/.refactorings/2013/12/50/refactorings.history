@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;RailPro-Boston-AppEngine/war/web-inf&apos; to &apos;WEB-INF&apos;" description="Rename resource &apos;web-inf&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="war/web-inf" name="WEB-INF" stamp="1386874379715" updateReferences="true"/>
+</session>
