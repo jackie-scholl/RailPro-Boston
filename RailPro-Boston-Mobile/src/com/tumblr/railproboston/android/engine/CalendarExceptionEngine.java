@@ -2,14 +2,12 @@ package com.tumblr.railproboston.android.engine;
 
 import java.util.List;
 
-import com.tumblr.railproboston.android.engine.CalendarExceptionReaderContract.CalendarExceptionEntry;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
-import android.util.Log;
+
+import com.tumblr.railproboston.android.engine.CalendarExceptionReaderContract.CalendarExceptionEntry;
 
 public class CalendarExceptionEngine extends BaseScheduleEngine<String, CalendarException> {
 	private static final String CLASSNAME = new Object() {}.getClass().getEnclosingClass().getSimpleName();

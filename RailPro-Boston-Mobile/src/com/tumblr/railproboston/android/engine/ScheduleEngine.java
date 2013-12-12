@@ -1,21 +1,14 @@
 package com.tumblr.railproboston.android.engine;
 
-import java.io.*;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
 import java.util.zip.ZipFile;
-
-import com.tumblr.railproboston.android.engine.types.Route;
-import com.tumblr.railproboston.android.engine.types.StopTime;
-import com.tumblr.railproboston.android.engine.types.Trip;
-
-//import jscholl.commuterrail.engine.TripsReaderContract;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+
+import com.tumblr.railproboston.android.engine.types.*;
 
 public class ScheduleEngine {
 	static final String CLASSNAME = new Object() {}.getClass().getEnclosingClass()
@@ -25,8 +18,6 @@ public class ScheduleEngine {
 	public static final String CALENDAR = "calendar.txt";
 	public static final String CALENDAR_EXCEPTIONS = "calendar_dates.txt";
 
-	private static FutureTask<Void> tripsFuture;
-	private static FutureTask<Void> stopTimesFuture;
 	static ZipFile gtfs = null;
 	private static Context context = null;
 
@@ -56,28 +47,6 @@ public class ScheduleEngine {
 		stopTimesEngine.prepareDatabase();
 		calendarEngine.prepareDatabase();
 	}
-
-	/*public static void waitOnTrips() {
-		try {
-			if (tripsFuture != null)
-				tripsFuture.get();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			e.printStackTrace();
-		}
-	}*/
-
-	/*public static void waitOnStopTimes() {
-		try {
-			if (stopTimesFuture != null)
-				stopTimesFuture.get();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			e.printStackTrace();
-		}
-	}*/
 
 	public static Route getRoute(Context ctx, String routeId) {
 		for (Route r : getRoutes(ctx)) {
