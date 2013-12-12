@@ -50,10 +50,10 @@ public class PredictionEngine {
         com.google.appengine.api.ThreadManager.currentRequestThreadFactory().newThread(r).run();
     }
     
-    private void updatePredictionsSync(Map<String, String> jsonMap) {
-        for (String route : jsonMap.keySet()) {
-            String json = jsonMap.get(route);
-            MessageList messageList = JsonEngine.getMessageListFromJson(json, route);
+    private void updatePredictionsSync(Map<String, String> csvMap) {
+        for (String route : csvMap.keySet()) {
+            String csv = csvMap.get(route);
+            MessageList messageList = CsvEngine.getMessageListFromCsv(csv, route);
             if (messageList == null) {
                 log.warning("messageList is null");
                 return;

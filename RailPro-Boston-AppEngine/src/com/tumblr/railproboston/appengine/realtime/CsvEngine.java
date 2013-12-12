@@ -1,24 +1,30 @@
 package com.tumblr.railproboston.appengine.realtime;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class CsvEngine {
     private static final Logger log = PredictServlet.log;
     
-    public static MessageList getMessageListFromJson(String csv, String route) {
+    public static MessageList getMessageListFromCsv(String csv, String route) {
         log.fine("Getting messages from CSV");
+        log.warning("CSV: " + csv);
         if (csv == null || csv.isEmpty()) {
             log.warning("csv is null or empty; csv=" + csv);
             return null;
         }
         
-        String[] csvMessages = csv.split("\\n", 1)[1].split("\\n"); // Removes first line before splitting
+        //int numNewlines = csv.split("\n").length - 1;
+        //log.info("There were this many newlines in the message: " + numNewlines);
+        
+        String[] csvMessages = csv.split("\n", 2);
+        //log.warning("CSV messages 1: " + Arrays.toString(csvMessages));
+        csvMessages = csvMessages[1].split("\n"); // Removes first line before splitting
+        //log.warning("CSV messages 2: " + Arrays.toString(csvMessages));
         
         List<Message> messageList = new ArrayList<Message>();
         for (String cmsg : csvMessages) {
-            String[] c = cmsg.split(",");
+            String[] c = cmsg.split(",", -1);
             
             if (c.length != 12) {
                 log.warning("wrong length: " + c.length);

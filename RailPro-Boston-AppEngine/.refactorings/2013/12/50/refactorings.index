@@ -1,1 +1,7 @@
 1386874379715	Rename resource 'web-inf'
+1386874866854	Rename method 'getJsonForRouteSync'
+1386874881506	Rename method 'getJsonForRouteAsync'
+1386874966601	Rename method 'putJson'
+1386874994564	Rename local variable 'jsonMap'
+1386876202006	Rename method 'updateJsonForAll'
+1386876737029	Delete element

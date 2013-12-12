@@ -77,6 +77,8 @@ public class RefillUpdateTasksServlet extends HttpServlet {
         
         double neededTasks = QUEUE_LENGTH_SECONDS * MAX_RATE - currentTasks;
         
+        neededTasks = Math.max(neededTasks, 10.0);
+        
         return (int) Math.ceil(neededTasks);
     }
     
