@@ -16,7 +16,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.tumblr.railproboston.android.engine.ScheduleEngine;
-import com.tumblr.railproboston.android.engine.StopTimesEngine;
 import com.tumblr.railproboston.android.engine.types.StopTime;
 import com.tumblr.railproboston.android.engine.types.Trip;
 import com.tumblr.railproboston.android.predict.PredictionEngine;
@@ -69,7 +68,7 @@ public class StopTimesFragment extends ListFragment implements OnPredictionFound
 		private String CLASSNAME = new Object() {}.getClass().getEnclosingClass().getSimpleName();
 
 		protected List<StopTime> doInBackground(Trip... trips) {
-			ScheduleEngine.waitOnStopTimes();
+			//ScheduleEngine.waitOnStopTimes();
 			return ScheduleEngine.getStopTimes(getActivity(), trips[0]);
 		}
 

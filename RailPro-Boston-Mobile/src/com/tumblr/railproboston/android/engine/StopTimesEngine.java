@@ -48,7 +48,8 @@ public class StopTimesEngine extends BaseScheduleEngine<Trip, StopTime> {
 	}
 
 	protected String selection(Trip t) {
-		return StopTimeEntry.COLUMN_NAME_TRIP_ID + "=" + "\"" + t.getTripId() + "\"";
+		return equalsSelection(StopTimeEntry.COLUMN_NAME_TRIP_ID, t.getTripId());
+		//return StopTimeEntry.COLUMN_NAME_TRIP_ID + "=" + "\"" + t.getTripId() + "\"";
 	}
 
 	protected String[] selectionArgs(Trip trip) {

@@ -1,24 +1,32 @@
 package com.tumblr.railproboston.android.engine;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
-import android.annotation.TargetApi;
+import com.tumblr.railproboston.android.ui.DownloadZipDialog;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
-import android.os.Build;
+import android.os.Environment;
 import android.util.Log;
 
 public abstract class BaseScheduleEngine<K, V> {
@@ -44,7 +52,14 @@ public abstract class BaseScheduleEngine<K, V> {
 		getPopulatedReadableDatabase().close();
 	}
 
-	public List<V> getAll(List<K> keys) {
+	public List<V> getAll() {
+		Log.d(CLASSNAME, String.format("About to get %s from database", name));
+		String query = SQLiteQueryBuilder.buildQueryString(false, getTableName(), columns(), null,
+				null, null, sortOrder(), null);
+		return dbRawQuery(query);
+	}
+
+	public List<V> getList(List<K> keys) {
 		Log.d(CLASSNAME, String.format("About to get %s from database", name));
 
 		List<V> vals = new ArrayList<V>();
@@ -59,23 +74,34 @@ public abstract class BaseScheduleEngine<K, V> {
 				iterator.remove();
 			}
 		}
+
 		if (keys.size() == 0)
 			return vals;
 
-		if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
-			for (K k : keys)
-				vals.addAll(get(k));
-			return vals;
-		}
+		String query = getUnionQuery(keys);
+
+		vals.addAll(dbRawQuery(query));
+
+		return vals;
+	}
+
+	public List<V> getList(K... keys) {
+		return getList(Arrays.asList(keys));
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<V> get(K key) {
+		return getList(key);
+	}
+
+	private List<V> dbRawQuery(String query) {
+		List<V> vals = new ArrayList<V>();
 
 		SQLiteDatabase db = getPopulatedReadableDatabase();
-		String query = getUnionQuery(keys);
-		Log.d(CLASSNAME, String.format("Query is: %s", query));
-		Log.i(CLASSNAME, "About to make query");
+		Log.i(CLASSNAME, String.format("Query is: %s", query));
 		Cursor c = db.rawQuery(query, null);
-		Log.i(CLASSNAME, "About to process query results");
 		c.moveToFirst();
-		Log.d(CLASSNAME, "There were this many results: " + c.getCount());
+		Log.i(CLASSNAME, "There were this many results: " + c.getCount());
 
 		while (!c.isAfterLast()) {
 			vals.add(extractValue(c));
@@ -87,34 +113,26 @@ public abstract class BaseScheduleEngine<K, V> {
 		return vals;
 	}
 
-	public List<V> get(K key) {
-		Log.d(CLASSNAME, String.format("About to get %s", name));
+	private String getUnionQuery(List<K> keys) {
+		SQLiteQueryBuilder b = new SQLiteQueryBuilder();
+		b.setTables(this.getTableName());
+		String[] subQueries = new String[keys.size()];
+		for (int i = 0; i < keys.size(); i++)
+			subQueries[i] = getUnionSubQuery(keys.get(i));
+		return b.buildUnionQuery(subQueries, sortOrder(), null);
+	}
 
-		List<V> values = new ArrayList<V>();
-		SQLiteDatabase db = getPopulatedReadableDatabase();
+	@SuppressWarnings("deprecation")
+	private String getUnionSubQuery(K k) {
+		String selection = this.selection(k);
+		String[] columns = this.columns();
+		String sortOrder = this.sortOrder();
+		SQLiteQueryBuilder b = new SQLiteQueryBuilder();
+		b.setTables(getTableName());
 
-		// How you want the results sorted in the resulting Cursor
-		String sortOrder = sortOrder();
-		String selection = selection(key); // SQL where clause
-		String[] selectionArgs = selectionArgs(key);
-
-		Log.d(CLASSNAME, String.format("Query is: %s with args %s", selection,
-				Arrays.toString(selectionArgs)));
-		Log.i(CLASSNAME, "About to make query");
-
-		Cursor c = db.query(getTableName(), null, selection, selectionArgs, null, null, sortOrder);
-
-		Log.i(CLASSNAME, "About to process query results");
-		c.moveToFirst();
-		Log.d(CLASSNAME, "There were this many results: " + c.getCount());
-
-		while (!c.isAfterLast()) {
-			values.add(extractValue(c));
-			c.moveToNext();
-		}
-		db.close();
-		Log.d(CLASSNAME, "Done processing query results");
-		return values;
+		return b.buildQuery(columns, selection, null, null, null, sortOrder, null);
+		//return b.buildUnionSubQuery("typeDiscriminator", columns, set, 0, "typeDiscriminator",
+		//		selection, null, null);
 	}
 
 	public boolean buildDatabase() {
@@ -134,7 +152,7 @@ public abstract class BaseScheduleEngine<K, V> {
 		return true;
 	}
 
-	private SQLiteDatabase getPopulatedReadableDatabase() {
+	private synchronized SQLiteDatabase getPopulatedReadableDatabase() {
 		SQLiteOpenHelper mDbHelper = ScheduleEngine.getDbHelper(ctx);
 
 		SQLiteDatabase db = mDbHelper.getReadableDatabase();
@@ -150,7 +168,7 @@ public abstract class BaseScheduleEngine<K, V> {
 		List<V> stopTimes = new ArrayList<V>();
 
 		try {
-			BufferedReader br = ScheduleEngine.getReader(getFileName());
+			BufferedReader br = getReader(getFileName());
 			br.readLine(); // Clears the line with the headers
 			String line;
 			while ((line = br.readLine()) != null) {
@@ -167,38 +185,9 @@ public abstract class BaseScheduleEngine<K, V> {
 		return stopTimes;
 	}
 
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
-	private String getUnionQuery(List<K> keys) {
-		SQLiteQueryBuilder b = new SQLiteQueryBuilder();
-		b.setTables(getTableName());
-		String[] subQueries = new String[keys.size()];
-		for (int i = 0; i < keys.size(); i++)
-			subQueries[i] = getUnionSubQuery(keys.get(i));
-		return b.buildUnionQuery(subQueries, unionQuerySortOrder(), null);
+	protected static String equalsSelection(String columnName, String value) {
+		return columnName + "=" + "\"" + value + "\"";
 	}
-
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
-	protected String getUnionSubQuery(K k) {
-		//String selection = StopTimeEntry.COLUMN_NAME_TRIP_ID + "=" + "\"" + t.getTripId() + "\""; // SQL where clause
-		String selection = selection(k);
-		String[] columns = columns();
-		Set<String> set = new HashSet<String>();
-		set.addAll(Arrays.asList(columns));
-		SQLiteQueryBuilder b = new SQLiteQueryBuilder();
-		b.setTables(getTableName());
-		return b.buildUnionSubQuery("typeDiscriminator", columns, set, 0, "typeDiscriminator",
-				selection, null, null);
-	}
-
-	//protected abstract String getUnionSubQuery(K key);
-
-	protected abstract String selection(K key);
-
-	protected abstract String[] selectionArgs(K key);
-
-	protected abstract String[] columns();
-
-	//protected abstract String getUnionQuery(List<K> keys);
 
 	protected abstract String getPluralName();
 
@@ -208,11 +197,162 @@ public abstract class BaseScheduleEngine<K, V> {
 
 	protected abstract ContentValues getContentValues(V v);
 
+	protected abstract String selection(K key);
+
+	protected String[] columns() {
+		return null;
+	}
+
 	protected abstract String getTableName();
 
 	protected abstract String sortOrder();
 
-	protected abstract String unionQuerySortOrder();
-
 	protected abstract V extractValue(Cursor c);
+
+	private File getGtfs() {
+		File x = new File(ctx.getCacheDir(), "MBTA_GTFS");
+		x.mkdirs();
+		if (!x.isDirectory())
+			Log.w(ScheduleEngine.CLASSNAME, "Unable to create gtfs directory: " + x);
+		return x;
+	}
+
+	private File gtfsFile() {
+		return new File(getGtfs(), "MBTA_GTFS.zip");
+	}
+
+	private ZipFile getGtfsZip() {
+		Log.i(ScheduleEngine.CLASSNAME,
+				"Is external storage writeable? " + BaseScheduleEngine.isExternalStorageWritable());
+		if (ScheduleEngine.gtfs == null) {
+			if (!gtfsFile().exists()) {
+				boolean b = downloadFile("https://sites.google.com/site/rs0site/MBTA_GTFS-CR.zip?attredirects=0&d=1",
+						gtfsFile());
+				if (!b) {
+					Log.w(ScheduleEngine.CLASSNAME, "Failed to download MBTA GTFS file");
+					return null;
+				}
+			} else {
+				Log.i(ScheduleEngine.CLASSNAME, "GTFS file already exists");
+			}
+
+			try {
+				ScheduleEngine.gtfs = new ZipFile(gtfsFile());
+			} catch (IOException e) {
+				Log.w(ScheduleEngine.CLASSNAME, "Failed to initiate zip file: ", e);
+			}
+		}
+
+		Log.d(ScheduleEngine.CLASSNAME, "gtfs = " + ScheduleEngine.gtfs);
+		return ScheduleEngine.gtfs;
+	}
+
+	private boolean downloadFile(String sUrl, File downloadLoc) {
+		Log.i(ScheduleEngine.CLASSNAME, "Trying to download MBTA GTFS file");
+		Log.d(ScheduleEngine.CLASSNAME,
+				"Is external storage writeable? " + BaseScheduleEngine.isExternalStorageWritable());
+
+		//new DownloadZipDialogFragment().show(MainActivity.getInstance().getSupportFragmentManager(), "DownloadZipDialog");
+		boolean b = new DownloadZipDialog().call();
+		if (!b) {
+			Log.w(ScheduleEngine.CLASSNAME, "User denied file download");
+			return false;
+		}
+
+		InputStream input = null;
+		OutputStream output = null;
+		HttpURLConnection connection = null;
+		try {
+			URL url = new URL(sUrl);
+			connection = (HttpURLConnection) url.openConnection();
+			connection.connect();
+
+			// expect HTTP 200 OK, so we don't mistakenly save error report
+			// instead of the file
+			if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+				Log.w(ScheduleEngine.CLASSNAME, "Bad response code " + connection.getResponseCode());
+				return false;
+			}
+
+			// download the file
+			input = connection.getInputStream();
+			downloadLoc.createNewFile();
+			output = new FileOutputStream(downloadLoc);
+
+			byte data[] = new byte[4096];
+			int count;
+			while ((count = input.read(data)) != -1) {
+				output.write(data, 0, count);
+			}
+		} catch (IOException e) {
+			Log.e(ScheduleEngine.CLASSNAME, "Failed to download MBTA GTFS file because of exception ", e);
+			b = false;
+		} finally {
+			try {
+				if (output != null)
+					output.close();
+				if (input != null)
+					input.close();
+			} catch (IOException ignored) {}
+
+			if (connection != null)
+				connection.disconnect();
+		}
+
+		return b;
+	}
+
+	private BufferedReader getReader(String name) {
+		return new BufferedReader(new InputStreamReader(getZipStream("MBTA_GTFS-CR/" + name)));
+	}
+
+	private InputStream getZipStream(String name) {
+		try {
+			Log.d(ScheduleEngine.CLASSNAME, "Attempting to open zip stream for name " + name);
+			ZipFile gtfsZip = getGtfsZip();
+			ZipEntry entry = gtfsZip.getEntry(name);
+			return gtfsZip.getInputStream(entry);
+		} catch (IOException e) {
+			Log.e(ScheduleEngine.CLASSNAME, "Can't open zip stream " + name, e);
+		}
+		return null;
+	}
+
+	private static boolean isExternalStorageWritable() {
+		String state = Environment.getExternalStorageState();
+		if (Environment.MEDIA_MOUNTED.equals(state)) {
+			return true;
+		}
+		return false;
+	}
 }
+
+/*public List<V> get(K key) {
+Log.d(CLASSNAME, String.format("About to get %s", name));
+
+List<V> values = new ArrayList<V>();
+SQLiteDatabase db = getPopulatedReadableDatabase();
+
+String sortOrder = this.sortOrder();
+String selection = this.selection(key);
+String[] selectionArgs = this.selectionArgs(key);
+
+Log.d(CLASSNAME,
+		String.format("Query is: %s with args %s", selection,
+				Arrays.toString(selectionArgs)));
+Log.i(CLASSNAME, "About to make query");
+
+Cursor c = db.query(getTableName(), null, selection, selectionArgs, null, null, sortOrder);
+
+Log.i(CLASSNAME, "About to process query results");
+c.moveToFirst();
+Log.d(CLASSNAME, "There were this many results: " + c.getCount());
+
+while (!c.isAfterLast()) {
+	values.add(extractValue(c));
+	c.moveToNext();
+}
+db.close();
+Log.d(CLASSNAME, "Done processing query results");
+return values;
+}*/
