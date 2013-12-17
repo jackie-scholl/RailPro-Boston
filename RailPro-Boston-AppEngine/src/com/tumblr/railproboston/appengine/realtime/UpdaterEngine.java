@@ -38,11 +38,12 @@ public class UpdaterEngine {
     }
     
     private boolean updateCsvForAll() {
+        Date time = new Date();
         Map<String, String> csvMap = getCsvForAll();
         PredictionEngine e = new PredictionEngine();
         e.updatePredictionsAsync(csvMap);
         CsvDatabaseEngine db = new CsvDatabaseEngine();
-        boolean b = db.putCsv(csvMap);
+        boolean b = db.putCsv(csvMap, time);
         
         return b;
     }
@@ -74,8 +75,8 @@ public class UpdaterEngine {
     
     
     private static List<String> getRoutes() {
-        //return PredictServlet.getLineNames();
-        return Arrays.asList(new String[] { "CR-Providence" });
+        return PredictServlet.getLineNames();
+        //return Arrays.asList(new String[] { "CR-Providence" });
     }
     
     private Callable<String> getCsvForRouteAsync(String route) {
