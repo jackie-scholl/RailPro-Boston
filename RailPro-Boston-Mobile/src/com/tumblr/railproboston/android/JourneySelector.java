@@ -8,17 +8,14 @@ import android.util.Log;
 import android.view.Menu;
 
 import com.tumblr.railproboston.android.engine.ScheduleEngine;
-import com.tumblr.railproboston.android.engine.types.Route;
-import com.tumblr.railproboston.android.engine.types.Trip;
+import com.tumblr.railproboston.android.engine.types.*;
 import com.tumblr.railproboston.android.ui.RoutesFragment;
 import com.tumblr.railproboston.android.ui.StopTimesFragment;
 import com.tumblr.railproboston.android.ui.TripsFragment;
 
-public class MainActivityB extends FragmentActivity implements
-		RoutesFragment.OnRouteSelectedListener,
+public class JourneySelector extends FragmentActivity implements RoutesFragment.OnRouteSelectedListener,
 		TripsFragment.OnTripSelectedListener {
-	private final static String CLASSNAME = new Object() {}.getClass().getEnclosingClass()
-			.getSimpleName();
+	private final static String CLASSNAME = new Object() {}.getClass().getEnclosingClass().getSimpleName();
 	public static final String EXTRA_ROUTE = "jscholl.commuterrail.ROUTE";
 
 	@Override
@@ -65,8 +62,10 @@ public class MainActivityB extends FragmentActivity implements
 		return true;
 	}
 
+	private Route selectedRoute;
+
 	public void onRouteSelected(Route route) {
-		ScheduleEngine.setSelectedRoute(route);
+		selectedRoute = route;
 
 		TripsFragment newFragment = new TripsFragment();
 		Bundle args = new Bundle();
@@ -84,9 +83,11 @@ public class MainActivityB extends FragmentActivity implements
 		transaction.commit();
 	}
 
+	private Trip selectedTrip;
+
 	@Override
 	public void onTripSelected(Trip trip) {
-		ScheduleEngine.setSelectedTrip(trip);
+		this.selectedTrip = trip;
 		StopTimesFragment newFragment = new StopTimesFragment();
 		Bundle args = new Bundle();
 		args.putString(StopTimesFragment.EXTRA_TRIP, trip.tripId);
@@ -103,9 +104,11 @@ public class MainActivityB extends FragmentActivity implements
 		transaction.commit();
 	}
 
-	private static MainActivityB instance;
+	private StopTime selectedStopTime;
 
-	public static MainActivityB getInstance() {
+	private static JourneySelector instance;
+
+	public static JourneySelector getInstance() {
 		return instance;
 	}
 }

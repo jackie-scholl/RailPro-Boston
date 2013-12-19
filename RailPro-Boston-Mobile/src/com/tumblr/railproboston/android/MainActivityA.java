@@ -66,7 +66,7 @@ public class MainActivityA extends FragmentActivity implements
 	}
 
 	public void onRouteSelected(Route route) {
-		ScheduleEngine.setSelectedRoute(route);
+		//ScheduleEngine.setSelectedRoute(route);
 
 		TripsFragment newFragment = new TripsFragment();
 		Bundle args = new Bundle();
@@ -86,7 +86,7 @@ public class MainActivityA extends FragmentActivity implements
 
 	@Override
 	public void onTripSelected(Trip trip) {
-		ScheduleEngine.setSelectedTrip(trip);
+		//ScheduleEngine.setSelectedTrip(trip);
 		StopTimesFragment newFragment = new StopTimesFragment();
 		Bundle args = new Bundle();
 		args.putString(StopTimesFragment.EXTRA_TRIP, trip.tripId);

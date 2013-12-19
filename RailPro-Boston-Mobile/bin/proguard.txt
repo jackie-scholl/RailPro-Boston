@@ -1,6 +1,6 @@
+# view AndroidManifest.xml #generated:42
+-keep class com.tumblr.railproboston.android.JourneySelector { <init>(...); }
+
 # view AndroidManifest.xml #generated:31
 -keep class com.tumblr.railproboston.android.MainActivityA { <init>(...); }
-
-# view AndroidManifest.xml #generated:42
--keep class com.tumblr.railproboston.android.MainActivityB { <init>(...); }
 

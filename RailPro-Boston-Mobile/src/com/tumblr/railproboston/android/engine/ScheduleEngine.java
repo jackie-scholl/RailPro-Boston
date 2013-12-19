@@ -123,36 +123,23 @@ public class ScheduleEngine {
 		return s.replace("\"", "");
 	}
 
-	//TODO: Move this to MainActivity
-	private static Route selectedRoute;
-
-	public static Route getSelectedRoute() {
+	/*public static Route getSelectedRoute() {
 		return selectedRoute;
-	}
+	}*/
 
-	public static void setSelectedRoute(Route route) {
-		selectedRoute = route;
-	}
+	//public static void setSelectedRoute(Route route) {}
 
-	private static Trip selectedTrip;
-
-	public static Trip getSelectedTrip() {
+	/*public static Trip getSelectedTrip() {
 		return selectedTrip;
-	}
+	}*/
 
-	public static void setSelectedTrip(Trip trip) {
-		selectedTrip = trip;
-	}
+	//public static void setSelectedTrip(Trip trip) {}
 
-	private static StopTime selectedStopTime;
-
-	public static StopTime getSelectedStopTime() {
+	/*public static StopTime getSelectedStopTime() {
 		return selectedStopTime;
-	}
+	}*/
 
-	public static void setSelectedStopTime(StopTime stopTime) {
-		selectedStopTime = stopTime;
-	}
+	//public static void setSelectedStopTime(StopTime stopTime) {}
 
 	public static SQLiteOpenHelper getDbHelper(Context ctx) {
 		return new ScheduleReaderDbHelper(ctx);

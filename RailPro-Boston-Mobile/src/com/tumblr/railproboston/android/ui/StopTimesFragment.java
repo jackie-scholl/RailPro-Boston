@@ -95,7 +95,7 @@ public class StopTimesFragment extends ListFragment implements OnPredictionFound
 		clickedPosition = position;
 
 		StopTime selected = stops.get(position);
-		ScheduleEngine.setSelectedStopTime(selected);
+		//ScheduleEngine.setSelectedStopTime(selected);
 		predictionEngine.onStopTimeSelected(selected);
 	}
 
