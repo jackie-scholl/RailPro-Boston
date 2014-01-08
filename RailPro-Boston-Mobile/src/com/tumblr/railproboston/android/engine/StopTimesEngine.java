@@ -7,7 +7,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
-import com.tumblr.railproboston.android.engine.StopTimesReaderContract.StopTimeEntry;
 import com.tumblr.railproboston.android.engine.types.StopTime;
 import com.tumblr.railproboston.android.engine.types.Trip;
 
@@ -86,15 +85,26 @@ public class StopTimesEngine extends BaseScheduleEngine<Trip, StopTime> {
 		return cv;
 	}
 
-	public static SqlContract getContract() {
+	/*public static SqlContract getContract() {
 		return new StopTimesReaderContract();
-	}
-}
+	}*/
 
-final class StopTimesReaderContract implements SqlContract {
-	// To prevent someone from accidentally instantiating the contract class, give it an empty
-	// constructor.
-	public StopTimesReaderContract() {}
+	public static ScheduleEngineContract getContract2() {
+		return new ScheduleEngineContract() {
+			public String getTableName() {
+				return StopTimeEntry.TABLE_NAME;
+			}
+
+			public String getID() {
+				return StopTimeEntry._ID;
+			}
+
+			public String[] getColumns() {
+				return columns;
+			}
+
+		};
+	}
 
 	/* Inner class that defines the table contents */
 	public static abstract class StopTimeEntry implements BaseColumns {
@@ -104,6 +114,19 @@ final class StopTimesReaderContract implements SqlContract {
 		public static final String COLUMN_NAME_STOP_ID = "stopid";
 		public static final String COLUMN_NAME_STOP_SEQUENCE = "stopsequence";
 	}
+
+	private static String[] columns = new String[] { StopTimeEntry.COLUMN_NAME_TRIP_ID,
+			StopTimeEntry.COLUMN_NAME_ARRIVAL_TIME,
+			StopTimeEntry.COLUMN_NAME_STOP_ID,
+			StopTimeEntry.COLUMN_NAME_STOP_SEQUENCE };
+}
+
+/*final class StopTimesReaderContract implements SqlContract {
+	// To prevent someone from accidentally instantiating the contract class, give it an empty
+	// constructor.
+	public StopTimesReaderContract() {}
+
+	
 
 	private static final String TEXT_TYPE = " TEXT";
 	private static final String COMMA_SEP = ",";
@@ -150,4 +173,4 @@ class StopTimesReaderDbHelper extends SQLiteOpenHelper {
 	public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		onUpgrade(db, oldVersion, newVersion);
 	}
-}
+}*/

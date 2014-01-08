@@ -82,15 +82,44 @@ public class TripsEngine extends BaseScheduleEngine<Route, Trip> {
 		return cv;
 	}
 
-	public static SqlContract getContract() {
+	/*public static SqlContract getContract() {
 		return new SqlContract() {
+			private static final String TEXT_TYPE = " TEXT";
+			private static final String COMMA_SEP = ",";
+
 			public String getSqlCreateTable() {
-				return SQL_CREATE_ENTRIES;
+				String columnList = "";
+				for (int i = 0; i < columns.length; i++) {
+					String c = columns[i] + TEXT_TYPE;
+					if (i != columns.length - 1)
+						c += COMMA_SEP;
+					columnList += c;
+				}
+
+				return String.format(Locale.US, "CREATE TABLE %s (%s INTEGER PRIMARY KEY,%s )", TripEntry.TABLE_NAME,
+						TripEntry._ID, columnList);
 			}
 
 			public String getSqlDeleteTable() {
-				return SQL_DELETE_ENTRIES;
+				return "DROP TABLE IF EXISTS " + TripEntry.TABLE_NAME;
 			}
+		};
+	}*/
+
+	public static ScheduleEngineContract getContract2() {
+		return new ScheduleEngineContract() {
+			public String getTableName() {
+				return TripEntry.TABLE_NAME;
+			}
+
+			public String getID() {
+				return TripEntry._ID;
+			}
+
+			public String[] getColumns() {
+				return columns;
+			}
+
 		};
 	}
 
@@ -116,34 +145,16 @@ public class TripsEngine extends BaseScheduleEngine<Route, Trip> {
 		private static final String COLUMN_NAME_SHAPE_ID = "shapeid";
 	}
 
-	private static final String TEXT_TYPE = " TEXT";
-	private static final String COMMA_SEP = ",";
-	private static final String SQL_CREATE_ENTRIES =
-			"CREATE TABLE " + TripEntry.TABLE_NAME + "  (" +
-					TripEntry._ID + " INTEGER PRIMARY KEY," +
-					TripEntry.COLUMN_NAME_ROUTE_ID + TEXT_TYPE + COMMA_SEP +
-					TripEntry.COLUMN_NAME_SERVICE_ID + TEXT_TYPE + COMMA_SEP +
-					TripEntry.COLUMN_NAME_TRIP_ID + TEXT_TYPE + COMMA_SEP +
-					TripEntry.COLUMN_NAME_TRIP_HEADSIGN + TEXT_TYPE + COMMA_SEP +
-					TripEntry.COLUMN_NAME_DIRECTION_ID + TEXT_TYPE + COMMA_SEP +
-					TripEntry.COLUMN_NAME_BLOCK_ID + TEXT_TYPE + COMMA_SEP +
-					TripEntry.COLUMN_NAME_SHAPE_ID + TEXT_TYPE + " )";
+	/*"CREATE TABLE " + TripEntry.TABLE_NAME + "  (" +
+			TripEntry._ID + " INTEGER PRIMARY KEY," +
+			TripEntry.COLUMN_NAME_ROUTE_ID + TEXT_TYPE + COMMA_SEP +
+			TripEntry.COLUMN_NAME_SERVICE_ID + TEXT_TYPE + COMMA_SEP +
+			TripEntry.COLUMN_NAME_TRIP_ID + TEXT_TYPE + COMMA_SEP +
+			TripEntry.COLUMN_NAME_TRIP_HEADSIGN + TEXT_TYPE + COMMA_SEP +
+			TripEntry.COLUMN_NAME_DIRECTION_ID + TEXT_TYPE + COMMA_SEP +
+			TripEntry.COLUMN_NAME_BLOCK_ID + TEXT_TYPE + COMMA_SEP +
+			TripEntry.COLUMN_NAME_SHAPE_ID + TEXT_TYPE + " )";*/
 
-	private static String getSqlCreateEntries() {
-		String columnList = "";
-		for (int i = 0; i < columns.length; i++) {
-			String c = columns[i] + TEXT_TYPE;
-			if (i != columns.length - 1)
-				c += COMMA_SEP;
-			columnList += c;
-		}
-
-		return String.format(Locale.US, "CREATE TABLE %s (%s INTEGER PRIMARY KEY,%s )", TripEntry.TABLE_NAME,
-				TripEntry._ID, columnList);
-	}
-
-	private static final String SQL_DELETE_ENTRIES =
-			"DROP TABLE IF EXISTS " + TripEntry.TABLE_NAME;
 }
 
 /*final class TripsReaderContract implements SqlContract {

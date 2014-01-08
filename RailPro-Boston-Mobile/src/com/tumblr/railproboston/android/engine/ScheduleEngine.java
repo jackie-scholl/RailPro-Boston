@@ -146,10 +146,12 @@ public class ScheduleEngine {
 	}
 }
 
-interface SqlContract {
-	public String getSqlCreateTable();
+interface ScheduleEngineContract {
+	public String[] getColumns();
 
-	public String getSqlDeleteTable();
+	public String getTableName();
+
+	public String getID();
 }
 
 class ScheduleReaderDbHelper extends SQLiteOpenHelper {
@@ -157,35 +159,52 @@ class ScheduleReaderDbHelper extends SQLiteOpenHelper {
 			.getSimpleName();
 
 	// If you change the database schema, you must increment the database version.
-	public static final int DATABASE_VERSION = 1;
+	public static final int DATABASE_VERSION = 2;
 	public static final String DATABASE_NAME = "Schedule.db";
-	private List<SqlContract> contracts;
+	private List<ScheduleEngineContract> contracts;
 
 	public ScheduleReaderDbHelper(Context ctx) {
-		this(ctx, RoutesEngine.getContract(), TripsEngine.getContract(), StopTimesEngine
-				.getContract());
+		this(ctx, RoutesEngine.getContract2(), TripsEngine.getContract2(), StopTimesEngine
+				.getContract2(), CalendarEngine.getContract2());
 	}
 
-	public ScheduleReaderDbHelper(Context context, SqlContract... sqlContracts) {
+	public ScheduleReaderDbHelper(Context context, ScheduleEngineContract... sqlContracts) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
-		this.contracts = new ArrayList<SqlContract>();
-		for (SqlContract c : sqlContracts) {
+		this.contracts = new ArrayList<ScheduleEngineContract>();
+		for (ScheduleEngineContract c : sqlContracts) {
 			this.contracts.add(c);
 		}
 	}
 
 	public void onCreate(SQLiteDatabase db) {
 		Log.d(CLASSNAME, "About to create database");
-		for (SqlContract c : contracts)
-			db.execSQL(c.getSqlCreateTable());
+		for (ScheduleEngineContract c : contracts)
+			db.execSQL(getSqlCreateTable(c));
 		Log.d(CLASSNAME, "Finished creating database");
+	}
+
+	private static final String TEXT_TYPE = " TEXT";
+	private static final String COMMA_SEP = ",";
+
+	private static String getSqlCreateTable(ScheduleEngineContract c) {
+		String[] columns = c.getColumns();
+		String columnList = "";
+		for (int i = 0; i < columns.length; i++) {
+			String x = columns[i] + TEXT_TYPE;
+			if (i != columns.length - 1)
+				x += COMMA_SEP;
+			columnList += x;
+		}
+
+		return String.format(Locale.US, "CREATE TABLE %s (%s INTEGER PRIMARY KEY,%s )", c.getTableName(), c.getID(),
+				columnList);
 	}
 
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		// This database is only a cache for online data, so its upgrade policy is
 		// to simply to discard the data and start over
-		for (SqlContract c : contracts) {
-			db.execSQL(c.getSqlDeleteTable());
+		for (ScheduleEngineContract c : contracts) {
+			db.execSQL("DROP TABLE IF EXISTS " + c.getTableName());
 		}
 		onCreate(db);
 	}

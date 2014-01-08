@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.provider.BaseColumns;
 
-import com.tumblr.railproboston.android.engine.RoutesReaderContract.RouteEntry;
 import com.tumblr.railproboston.android.engine.types.Route;
 
 public class RoutesEngine extends BaseScheduleEngine<String, Route> {
@@ -71,38 +70,62 @@ public class RoutesEngine extends BaseScheduleEngine<String, Route> {
 				RouteEntry.COLUMN_NAME_SHORT_NAME };
 	}
 
-	public static SqlContract getContract() {
-		return new RoutesReaderContract();
-	}
-}
+	public static ScheduleEngineContract getContract2() {
+		return new ScheduleEngineContract() {
+			public String getTableName() {
+				return RouteEntry.TABLE_NAME;
+			}
 
-final class RoutesReaderContract implements SqlContract {
-	// To prevent someone from accidentally instantiating the contract class, give it an empty constructor.
-	public RoutesReaderContract() {}
+			public String getID() {
+				return RouteEntry._ID;
+			}
+
+			public String[] getColumns() {
+				return columns;
+			}
+
+		};
+	}
 
 	/* Inner class that defines the table contents */
-	public static abstract class RouteEntry implements BaseColumns {
+	private static abstract class RouteEntry implements BaseColumns {
 		public static final String TABLE_NAME = "route";
 		public static final String COLUMN_NAME_ROUTE_ID = "routeid";
 		public static final String COLUMN_NAME_SHORT_NAME = "shortName";
 		public static final String COLUMN_NAME_LONG_NAME = "longName";
 	}
 
-	private static final String TEXT_TYPE = " TEXT";
-	private static final String COMMA_SEP = ",";
-	static final String SQL_CREATE_ENTRIES = "CREATE TABLE " + RouteEntry.TABLE_NAME + "  (" +
-			RouteEntry._ID + " INTEGER PRIMARY KEY," +
-			RouteEntry.COLUMN_NAME_ROUTE_ID + TEXT_TYPE + COMMA_SEP +
-			RouteEntry.COLUMN_NAME_SHORT_NAME + TEXT_TYPE + COMMA_SEP +
-			RouteEntry.COLUMN_NAME_LONG_NAME + TEXT_TYPE + " )";
-
-	static final String SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS " + RouteEntry.TABLE_NAME;
-
-	public String getSqlCreateTable() {
-		return SQL_CREATE_ENTRIES;
-	}
-
-	public String getSqlDeleteTable() {
-		return SQL_DELETE_ENTRIES;
-	}
+	private static String[] columns = new String[] { RouteEntry.COLUMN_NAME_ROUTE_ID,
+			RouteEntry.COLUMN_NAME_SHORT_NAME, RouteEntry.COLUMN_NAME_LONG_NAME };
 }
+
+/*final class RoutesReaderContract implements SqlContract {
+	// To prevent someone from accidentally instantiating the contract class, give it an empty constructor.
+	public RoutesReaderContract() {}
+
+	/* Inner class that defines the table contents */
+/*public static abstract class RouteEntry implements BaseColumns {
+	public static final String TABLE_NAME = "route";
+	public static final String COLUMN_NAME_ROUTE_ID = "routeid";
+	public static final String COLUMN_NAME_SHORT_NAME = "shortName";
+	public static final String COLUMN_NAME_LONG_NAME = "longName";
+}
+
+/*private static final String TEXT_TYPE = " TEXT";
+private static final String COMMA_SEP = ",";
+static final String SQL_CREATE_ENTRIES = "CREATE TABLE " + RouteEntry.TABLE_NAME + "  (" +
+		RouteEntry._ID + " INTEGER PRIMARY KEY," +
+		RouteEntry.COLUMN_NAME_ROUTE_ID + TEXT_TYPE + COMMA_SEP +
+		RouteEntry.COLUMN_NAME_SHORT_NAME + TEXT_TYPE + COMMA_SEP +
+		RouteEntry.COLUMN_NAME_LONG_NAME + TEXT_TYPE + " )";
+
+static final String SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS " + RouteEntry.TABLE_NAME;
+
+public String getSqlCreateTable() {
+	return SQL_CREATE_ENTRIES;
+}
+
+public String getSqlDeleteTable() {
+	return SQL_DELETE_ENTRIES;
+}*/
+//}

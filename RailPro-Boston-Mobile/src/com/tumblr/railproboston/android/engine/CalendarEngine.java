@@ -8,8 +8,6 @@ import android.database.Cursor;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-import com.tumblr.railproboston.android.engine.CalendarReaderContract.CalendarEntry;
-
 public class CalendarEngine extends BaseScheduleEngine<String, ServiceDate> {
 	private static final String CLASSNAME = new Object() {}.getClass().getEnclosingClass().getSimpleName();
 
@@ -62,6 +60,53 @@ public class CalendarEngine extends BaseScheduleEngine<String, ServiceDate> {
 		values.put(CalendarEntry.COLUMN_NAME_END_DATE, v.endDate);
 		return values;
 	}
+
+	/*public static SqlContract getContract() {
+		return new SqlContract() {
+			public String getSqlCreateTable() {
+				return SQL_CREATE_ENTRIES;
+			}
+
+			public String getSqlDeleteTable() {
+				return SQL_DELETE_ENTRIES;
+			}
+		};
+	}*/
+
+	public static ScheduleEngineContract getContract2() {
+		return new ScheduleEngineContract() {
+			public String getTableName() {
+				return CalendarEntry.TABLE_NAME;
+			}
+
+			public String getID() {
+				return CalendarEntry._ID;
+			}
+
+			public String[] getColumns() {
+				return columns;
+			}
+
+		};
+	}
+
+	/* Inner class that defines the table contents */
+	private static abstract class CalendarEntry implements BaseColumns {
+		public static final String TABLE_NAME = "calendar";
+		public static final String COLUMN_NAME_SERVICE_ID = "serviceid";
+		public static final String COLUMN_NAME_WEEKDAYS = "weekdays";
+		public static final String COLUMN_NAME_SATURDAYS = "saturdays";
+		public static final String COLUMN_NAME_SUNDAYS = "sundays";
+		public static final String COLUMN_NAME_START_DATE = "startdate";
+		public static final String COLUMN_NAME_END_DATE = "enddate";
+	}
+
+	private static String[] columns = new String[] { CalendarEntry.COLUMN_NAME_SERVICE_ID,
+			CalendarEntry.COLUMN_NAME_WEEKDAYS,
+			CalendarEntry.COLUMN_NAME_SATURDAYS,
+			CalendarEntry.COLUMN_NAME_SUNDAYS,
+			CalendarEntry.COLUMN_NAME_START_DATE,
+			CalendarEntry.COLUMN_NAME_END_DATE };
 
 	@Override
 	protected String selection(String key) {
