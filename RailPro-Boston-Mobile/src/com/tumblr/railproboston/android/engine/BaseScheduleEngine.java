@@ -253,11 +253,12 @@ public abstract class BaseScheduleEngine<K, V> {
 				"Is external storage writeable? " + BaseScheduleEngine.isExternalStorageWritable());
 
 		//new DownloadZipDialogFragment().show(MainActivity.getInstance().getSupportFragmentManager(), "DownloadZipDialog");
-		boolean b = new DownloadZipDialog().call();
+		boolean b = true;
+		/*boolean b = new DownloadZipDialog().call();
 		if (!b) {
 			Log.w(ScheduleEngine.CLASSNAME, "User denied file download");
 			return false;
-		}
+		}*/
 
 		InputStream input = null;
 		OutputStream output = null;
